@@ -1,6 +1,6 @@
 # Road Runner FTCLib Quickstart
 
-** CURRENTLY IN PRODUCTION **
+**CURRENTLY IN PRODUCTION**
 
 An example FTC project using [Road Runner](https://github.com/acmerobotics/road-runner) with a dependency for [FTCLib](https://www.github.com/FTCLib/FTCLib) to set up a command-based project.
 
@@ -8,7 +8,7 @@ An example FTC project using [Road Runner](https://github.com/acmerobotics/road-
 
 For more detailed instructions on getting Road Runner setup in your own project, see the [Road Runner README](https://github.com/acmerobotics/road-runner#core).
 
-1. Download or clone this repo with `git clone https://github.com/acmerobotics/road-runner-quickstart`.
+1. Download or clone this repo with `git clone https://github.com/FTCLib/RoadRunner-FTCLib-Quickstart.git`.
 
 1. Open the project in Android Studio and build `TeamCode` like any other `ftc_app` project.
 
