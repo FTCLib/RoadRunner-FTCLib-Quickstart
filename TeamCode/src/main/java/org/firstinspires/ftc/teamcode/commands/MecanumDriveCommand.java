@@ -1,0 +1,32 @@
+package org.firstinspires.ftc.teamcode.commands;
+
+import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.arcrobotics.ftclib.command.CommandBase;
+
+import org.firstinspires.ftc.teamcode.subsystems.MecanumDriveSubsystem;
+
+import java.util.function.DoubleSupplier;
+
+public class MecanumDriveCommand extends CommandBase {
+
+    private final MecanumDriveSubsystem drive;
+    private final DoubleSupplier leftY, leftX, rightX;
+
+    public MecanumDriveCommand(MecanumDriveSubsystem drive, DoubleSupplier leftY,
+                               DoubleSupplier leftX, DoubleSupplier rightX) {
+        this.drive = drive;
+        this.leftX = leftX;
+        this.leftY = leftY;
+        this.rightX = rightX;
+    }
+
+    @Override
+    public void execute() {
+        drive.drive(new Pose2d(
+                -leftY.getAsDouble(),
+                -leftX.getAsDouble(),
+                -rightX.getAsDouble()
+        ));
+    }
+
+}
