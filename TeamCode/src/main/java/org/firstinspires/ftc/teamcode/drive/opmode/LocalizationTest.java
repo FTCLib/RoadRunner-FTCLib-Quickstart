@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.commands.MecanumDriveCommand;
+import org.firstinspires.ftc.teamcode.commands.RunCommand;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDriveSubsystem;
 
@@ -36,7 +37,7 @@ public class LocalizationTest extends CommandOpMode {
     public void initialize() {
         drive = new MecanumDriveSubsystem(new SampleMecanumDrive(hardwareMap), false);
 
-        schedule(new PerpetualCommand(new ScheduleCommand(new InstantCommand(
+        schedule(new PerpetualCommand(new RunCommand(
                 () -> {
                     Pose2d poseEstimate = drive.getPoseEstimate();
                     telemetry.addData("x", poseEstimate.getX());
@@ -44,7 +45,7 @@ public class LocalizationTest extends CommandOpMode {
                     telemetry.addData("heading", poseEstimate.getHeading());
                     telemetry.update();
                 }   // ignore requirements
-        ))));
+        )));
 
         driveCommand = new MecanumDriveCommand(
                 drive, () -> -gamepad.getLeftY(),

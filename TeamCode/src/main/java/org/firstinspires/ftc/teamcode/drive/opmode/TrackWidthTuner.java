@@ -5,15 +5,20 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.util.Angle;
+import com.arcrobotics.ftclib.command.CommandOpMode;
+import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.MovingStatistics;
 
 import org.firstinspires.ftc.robotcore.internal.system.Misc;
+import org.firstinspires.ftc.teamcode.commands.RunCommand;
+import org.firstinspires.ftc.teamcode.commands.TurnCommand;
 import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.subsystems.MecanumDriveSubsystem;
 
-/*
+/**
  * This routine determines the effective track width. The procedure works by executing a point turn
  * with a given angle and measuring the difference between that angle and the actual angle (as
  * indicated by an external IMU/gyro, track wheels, or some other localizer). The quotient
@@ -21,19 +26,28 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
  * (effective track width = estimated track width * given angle / actual angle). The routine repeats
  * this procedure a few times and averages the values for additional accuracy. Note: a relatively
  * accurate track width estimate is important or else the angular constraints will be thrown off.
+ *
+ * NOTE: this has been refactored to use FTCLib's command-based
  */
 @Config
 @Autonomous(group = "drive")
-public class TrackWidthTuner extends LinearOpMode {
+public class TrackWidthTuner extends CommandOpMode {
+
     public static double ANGLE = 180; // deg
     public static int NUM_TRIALS = 5;
     public static int DELAY = 1000; // ms
 
+    private MecanumDriveSubsystem drive;
+    private MovingStatistics trackWidthStats;
+    private TurnCommand turnCommand;
+    private double headingAccumulator, lastHeading;
+    private int trial;
+
     @Override
-    public void runOpMode() throws InterruptedException {
+    public void initialize() {
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
+        drive = new MecanumDriveSubsystem(new SampleMecanumDrive(hardwareMap), false);
         // TODO: if you haven't already, set the localizer to something that doesn't depend on
         // drive encoders for computing the heading
 
@@ -41,47 +55,56 @@ public class TrackWidthTuner extends LinearOpMode {
         telemetry.addLine("Make sure your robot has enough clearance to turn smoothly");
         telemetry.update();
 
-        waitForStart();
+        InstantCommand setupCommand = new InstantCommand(() -> {
+            telemetry.clearAll();
+            telemetry.addLine("Running...");
+            telemetry.update();
 
-        if (isStopRequested()) return;
+            trackWidthStats = new MovingStatistics(NUM_TRIALS);
+            trial = 0;
+        });
 
-        telemetry.clearAll();
-        telemetry.addLine("Running...");
-        telemetry.update();
+        InstantCommand finishCommand = new InstantCommand(() -> {
+            telemetry.clearAll();
+            telemetry.addLine("Tuning complete");
+            telemetry.addLine(Misc.formatInvariant("Effective track width = %.2f (SE = %.3f)",
+                    trackWidthStats.getMean(),
+                    trackWidthStats.getStandardDeviation() / Math.sqrt(NUM_TRIALS)));
+            telemetry.update();
+        });
 
-        MovingStatistics trackWidthStats = new MovingStatistics(NUM_TRIALS);
-        for (int i = 0; i < NUM_TRIALS; i++) {
-            drive.setPoseEstimate(new Pose2d());
+        RunCommand tuneCommand = new RunCommand(() -> {
+            if (turnCommand == null || !turnCommand.isScheduled()) {
+                if (turnCommand != null) {
+                    double trackWidth = DriveConstants.TRACK_WIDTH * Math.toRadians(ANGLE) / headingAccumulator;
+                    trackWidthStats.add(trackWidth);
+                }
 
-            // it is important to handle heading wraparounds
-            double headingAccumulator = 0;
-            double lastHeading = 0;
+                sleep(DELAY);
 
-            drive.turnAsync(Math.toRadians(ANGLE));
+                drive.setPoseEstimate(new Pose2d());
 
-            while (!isStopRequested() && drive.isBusy()) {
+                // it is important to handle heading wraparounds
+                headingAccumulator = 0;
+                lastHeading = 0;
+
+                turnCommand = new TurnCommand(drive, ANGLE);
+                turnCommand.schedule();
+
+                trial++;
+            } else {
                 double heading = drive.getPoseEstimate().getHeading();
                 headingAccumulator += Angle.norm(heading - lastHeading);
                 lastHeading = heading;
-
-                drive.update();
             }
+        }, drive);
 
-            double trackWidth = DriveConstants.TRACK_WIDTH * Math.toRadians(ANGLE) / headingAccumulator;
-            trackWidthStats.add(trackWidth);
-
-            sleep(DELAY);
-        }
-
-        telemetry.clearAll();
-        telemetry.addLine("Tuning complete");
-        telemetry.addLine(Misc.formatInvariant("Effective track width = %.2f (SE = %.3f)",
-                trackWidthStats.getMean(),
-                trackWidthStats.getStandardDeviation() / Math.sqrt(NUM_TRIALS)));
-        telemetry.update();
-
-        while (!isStopRequested()) {
-            idle();
-        }
+        schedule(setupCommand.andThen(
+                tuneCommand
+                    .deadlineWith(new WaitUntilCommand(() -> trial == NUM_TRIALS))
+                    .whenFinished(turnCommand::cancel),
+                finishCommand
+        ));
     }
+
 }
