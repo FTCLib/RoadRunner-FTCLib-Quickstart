@@ -63,7 +63,11 @@ public class MaxVelocityTuner extends CommandOpMode {
         RunCommand runCommand = new RunCommand(() -> {
             // update is called every loop in the periodic method of the drive subsystem
 
-            Pose2d poseVelo = Objects.requireNonNull(drive.getPoseVelocity(), "poseVelocity() must not be null. Ensure that the getWheelVelocities() method has been overridden in your localizer.");
+            Pose2d poseVelo = Objects.requireNonNull(
+                    drive.getPoseVelocity(),
+                    "poseVelocity() must not be null. " +
+                            "Ensure that the getWheelVelocities() method has been overridden in your localizer."
+            );
 
             maxVelocity = Math.max(poseVelo.vec().norm(), maxVelocity);
         }, drive);
