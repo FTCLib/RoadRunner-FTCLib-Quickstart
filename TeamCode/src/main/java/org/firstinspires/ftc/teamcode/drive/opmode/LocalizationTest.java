@@ -5,6 +5,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.PerpetualCommand;
+import com.arcrobotics.ftclib.command.ScheduleCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -35,7 +36,7 @@ public class LocalizationTest extends CommandOpMode {
     public void initialize() {
         drive = new MecanumDriveSubsystem(new SampleMecanumDrive(hardwareMap), false);
 
-        schedule(new PerpetualCommand(new InstantCommand(
+        schedule(new PerpetualCommand(new ScheduleCommand( new InstantCommand(
                 () -> {
                     Pose2d poseEstimate = drive.getPoseEstimate();
                     telemetry.addData("x", poseEstimate.getX());
@@ -43,7 +44,7 @@ public class LocalizationTest extends CommandOpMode {
                     telemetry.addData("heading", poseEstimate.getHeading());
                     telemetry.update();
                 }   // ignore requirements
-        )));
+        ))));
 
         driveCommand = new MecanumDriveCommand(
                 drive, () -> -gamepad.getLeftY(),

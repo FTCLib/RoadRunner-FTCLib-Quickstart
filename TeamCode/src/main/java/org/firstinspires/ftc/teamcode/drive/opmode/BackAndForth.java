@@ -6,6 +6,7 @@ import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.PerpetualCommand;
+import com.arcrobotics.ftclib.command.ScheduleCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
@@ -53,13 +54,13 @@ public class BackAndForth extends CommandOpMode {
                     .build()
         );
         SequentialCommandGroup backAndForthCommand = new SequentialCommandGroup(forwardFollower, backwardFollower);
-        schedule(new PerpetualCommand(new InstantCommand(
+        schedule(new PerpetualCommand(new ScheduleCommand( new InstantCommand(
                 () -> {
                     if (backAndForthCommand.isFinished() || !backAndForthCommand.isScheduled()) {
                         backAndForthCommand.schedule();
                     }
                 }
-        )));
+        ))));
     }
 
 }
