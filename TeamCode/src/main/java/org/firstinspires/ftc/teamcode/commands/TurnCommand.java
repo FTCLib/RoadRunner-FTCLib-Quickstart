@@ -12,6 +12,8 @@ public class TurnCommand extends CommandBase {
     public TurnCommand(MecanumDriveSubsystem drive, double angle) {
         this.drive = drive;
         this.angle = angle;
+        
+        addRequirements(drive);
     }
 
     @Override
