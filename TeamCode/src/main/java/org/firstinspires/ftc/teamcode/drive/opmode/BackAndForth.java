@@ -3,12 +3,17 @@ package org.firstinspires.ftc.teamcode.drive.opmode;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
+import com.arcrobotics.ftclib.command.CommandOpMode;
+import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.PerpetualCommand;
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.teamcode.commands.TrajectoryFollowerCommand;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.subsystems.MecanumDriveSubsystem;
 
-/*
+/**
  * Op mode for preliminary tuning of the follower PID coefficients (located in the drive base
  * classes). The robot drives back and forth in a straight line indefinitely. Utilization of the
  * dashboard is recommended for this tuning routine. To access the dashboard, connect your computer
@@ -23,30 +28,38 @@ import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
  *
  * This opmode is designed as a convenient, coarse tuning for the follower PID coefficients. It
  * is recommended that you use the FollowerPIDTuner opmode for further fine tuning.
+ *
+ * NOTE: this has been refactored to use FTCLib's command-based
  */
 @Config
 @Autonomous(group = "drive")
-public class BackAndForth extends LinearOpMode {
+public class BackAndForth extends CommandOpMode {
 
     public static double DISTANCE = 50;
 
-    @Override
-    public void runOpMode() throws InterruptedException {
-        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
+    private MecanumDriveSubsystem drive;
+    private TrajectoryFollowerCommand forwardFollower, backwardFollower;
 
-        Trajectory trajectoryForward = drive.trajectoryBuilder(new Pose2d())
+    @Override
+    public void initialize() {
+        drive = new MecanumDriveSubsystem(new SampleMecanumDrive(hardwareMap), false);
+        Trajectory forwardTrajectory = drive.trajectoryBuilder(new Pose2d())
                 .forward(DISTANCE)
                 .build();
-
-        Trajectory trajectoryBackward = drive.trajectoryBuilder(trajectoryForward.end())
-                .back(DISTANCE)
-                .build();
-
-        waitForStart();
-
-        while (opModeIsActive() && !isStopRequested()) {
-            drive.followTrajectory(trajectoryForward);
-            drive.followTrajectory(trajectoryBackward);
-        }
+        forwardFollower = new TrajectoryFollowerCommand(drive, forwardTrajectory);
+        backwardFollower = new TrajectoryFollowerCommand(drive,
+                drive.trajectoryBuilder(forwardTrajectory.end())
+                    .back(DISTANCE)
+                    .build()
+        );
+        SequentialCommandGroup backAndForthCommand = new SequentialCommandGroup(forwardFollower, backwardFollower);
+        schedule(new PerpetualCommand(new InstantCommand(
+                () -> {
+                    if (backAndForthCommand.isFinished() || !backAndForthCommand.isScheduled()) {
+                        backAndForthCommand.schedule();
+                    }
+                }
+        )));
     }
+
 }
