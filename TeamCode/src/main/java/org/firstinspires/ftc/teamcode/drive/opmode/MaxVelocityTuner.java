@@ -72,8 +72,8 @@ public class MaxVelocityTuner extends CommandOpMode {
             maxVelocity = Math.max(poseVelo.vec().norm(), maxVelocity);
         }, drive);
 
-        schedule(runCommand.deadlineWith(new WaitUntilCommand(() -> timer.seconds() < RUNTIME)).andThen(
-                new InstantCommand(() -> {
+        schedule(runCommand.deadlineWith(new WaitUntilCommand(() -> timer.seconds() < RUNTIME))
+                .andThen(new InstantCommand(() -> {
                     drive.setDrivePower(new Pose2d());
 
                     double effectiveKf = DriveConstants.getMotorVelocityF(veloInchesToTicks(maxVelocity));
@@ -81,8 +81,8 @@ public class MaxVelocityTuner extends CommandOpMode {
                     telemetry.addData("Max Velocity", maxVelocity);
                     telemetry.addData("Voltage Compensated kF", effectiveKf * batteryVoltageSensor.getVoltage() / 12);
                     telemetry.update();
-                })
-        ));
+                }, drive))
+        );
     }
 
     private double veloInchesToTicks(double inchesPerSec) {

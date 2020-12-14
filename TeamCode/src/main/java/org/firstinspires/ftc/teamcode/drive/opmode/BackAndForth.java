@@ -55,13 +55,11 @@ public class BackAndForth extends CommandOpMode {
                     .build()
         );
         SequentialCommandGroup backAndForthCommand = new SequentialCommandGroup(forwardFollower, backwardFollower);
-        schedule(new PerpetualCommand(new RunCommand(
-                () -> {
-                    if (backAndForthCommand.isFinished() || !backAndForthCommand.isScheduled()) {
-                        backAndForthCommand.schedule();
-                    }
-                }
-        )));
+        schedule(new RunCommand(() -> {
+            if (backAndForthCommand.isFinished() || !backAndForthCommand.isScheduled()) {
+                backAndForthCommand.schedule();
+            }
+        }));
     }
 
 }

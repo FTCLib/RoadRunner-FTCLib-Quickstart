@@ -59,15 +59,17 @@ public class FollowerPIDTuner extends CommandOpMode {
         turnCommand = new TurnCommand(drive, Math.toRadians(90));
 
         SequentialCommandGroup trajGroup = new SequentialCommandGroup(followerCommand, turnCommand);
-        schedule(trajGroup.whenFinished(() -> startPose = traj.end().plus(new Pose2d(0, 0, Math.toRadians(90)))),
-            new PerpetualCommand(new RunCommand(
-                () -> {
-                    if (trajGroup.isFinished() || !trajGroup.isScheduled()) {
-                        trajGroup.schedule();
-                    }
+
+        schedule(
+            trajGroup.whenFinished(
+                () -> startPose = traj.end().plus(new Pose2d(0, 0, Math.toRadians(90)))
+            ),
+            new RunCommand(() -> {
+                if (trajGroup.isFinished() || !trajGroup.isScheduled()) {
+                    trajGroup.schedule();
                 }
-            )
-        ));
+            })
+        );
     }
 
 }
