@@ -54,7 +54,7 @@ public class BackAndForth extends CommandOpMode {
                     .build()
         );
         SequentialCommandGroup backAndForthCommand = new SequentialCommandGroup(forwardFollower, backwardFollower);
-        schedule(new PerpetualCommand(new ScheduleCommand( new InstantCommand(
+        schedule(new PerpetualCommand(new ScheduleCommand(new InstantCommand(
                 () -> {
                     if (backAndForthCommand.isFinished() || !backAndForthCommand.isScheduled()) {
                         backAndForthCommand.schedule();

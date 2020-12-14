@@ -36,7 +36,7 @@ public class LocalizationTest extends CommandOpMode {
     public void initialize() {
         drive = new MecanumDriveSubsystem(new SampleMecanumDrive(hardwareMap), false);
 
-        schedule(new PerpetualCommand(new ScheduleCommand( new InstantCommand(
+        schedule(new PerpetualCommand(new ScheduleCommand(new InstantCommand(
                 () -> {
                     Pose2d poseEstimate = drive.getPoseEstimate();
                     telemetry.addData("x", poseEstimate.getX());
