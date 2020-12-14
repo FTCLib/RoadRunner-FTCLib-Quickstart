@@ -111,13 +111,13 @@ public class DriveVelocityPIDTuner extends CommandOpMode {
         telemetry.update();
         telemetry.clearAll();
 
-        schedule(new InstantCommand(() -> {
-            movingForwards = true;
-            activeProfile = generateProfile(true);
-            profileStart = clock.seconds();
-        }), new PerpetualCommand(new RunCommand(() -> telemetry.addData("mode", mode))));
-
-        schedule(new PerpetualCommand(new RunCommand(() -> {
+        schedule(
+            new InstantCommand(() -> {
+                movingForwards = true;
+                activeProfile = generateProfile(true);
+                profileStart = clock.seconds();
+            }), new PerpetualCommand(new RunCommand(() -> {
+            telemetry.addData("mode", mode);
             switch (mode) {
                 case TUNING_MODE:
                     if (gamepad1.x) {

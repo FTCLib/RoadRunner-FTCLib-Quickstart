@@ -101,7 +101,7 @@ public class MaxVelocityTuner extends CommandOpMode {
         }));
 
         ParallelDeadlineGroup runCommand = new ParallelDeadlineGroup(
-                new WaitUntilCommand()
+                new WaitUntilCommand(() -> timer.seconds() < RUNTIME)
         );
     }
 
