@@ -6,8 +6,11 @@ import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
 import com.arcrobotics.ftclib.command.SubsystemBase;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+
+import java.util.List;
 
 /**
  * A subsystem that uses the {@link SampleMecanumDrive} class.
@@ -28,6 +31,19 @@ public class MecanumDriveSubsystem extends SubsystemBase {
     public void init() {
         drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         drive.setMotorPowers(0, 0, 0, 0);
+        drive.setPoseEstimate(new Pose2d());
+    }
+
+    public void setMode(DcMotor.RunMode mode) {
+        drive.setMode(mode);
+    }
+
+    public void setPIDFCoefficients(DcMotor.RunMode mode, PIDFCoefficients coefficients) {
+        drive.setPIDFCoefficients(mode, coefficients);
+    }
+
+    public void setPoseEstimate(Pose2d pose) {
+        drive.setPoseEstimate(pose);
     }
 
     @Override
@@ -49,6 +65,10 @@ public class MecanumDriveSubsystem extends SubsystemBase {
                         -rightX
                 )
         );
+    }
+
+    public void setDrivePower(Pose2d drivePower) {
+        drive.setDrivePower(drivePower);
     }
 
     public Pose2d getPoseEstimate() {
@@ -77,6 +97,10 @@ public class MecanumDriveSubsystem extends SubsystemBase {
 
     public void turn(double radians) {
         drive.turnAsync(radians);
+    }
+
+    public List<Double> getWheelVelocities() {
+        return drive.getWheelVelocities();
     }
 
     public void stop() {
