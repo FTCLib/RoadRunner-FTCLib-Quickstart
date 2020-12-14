@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.commands.RunCommand;
 import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
 import org.firstinspires.ftc.teamcode.subsystems.MecanumDriveSubsystem;
@@ -38,47 +39,6 @@ public class MaxVelocityTuner extends CommandOpMode {
 
     private VoltageSensor batteryVoltageSensor;
 
-    @Override
-    public void runOpMode() throws InterruptedException {
-        SampleMecanumDrive drive = new SampleMecanumDrive(hardwareMap);
-
-        drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
-        batteryVoltageSensor = hardwareMap.voltageSensor.iterator().next();
-
-        telemetry.addLine("Your bot will go at full speed for " + RUNTIME + " seconds.");
-        telemetry.addLine("Please ensure you have enough space cleared.");
-        telemetry.addLine("");
-        telemetry.addLine("Press start when ready.");
-        telemetry.update();
-
-        waitForStart();
-
-        telemetry.clearAll();
-        telemetry.update();
-
-        drive.setDrivePower(new Pose2d(1, 0, 0));
-        timer = new ElapsedTime();
-
-        while (!isStopRequested() && timer.seconds() < RUNTIME) {
-            drive.updatePoseEstimate();
-
-            Pose2d poseVelo = Objects.requireNonNull(drive.getPoseVelocity(), "poseVelocity() must not be null. Ensure that the getWheelVelocities() method has been overridden in your localizer.");
-
-            maxVelocity = Math.max(poseVelo.vec().norm(), maxVelocity);
-        }
-
-        drive.setDrivePower(new Pose2d());
-
-        double effectiveKf = DriveConstants.getMotorVelocityF(veloInchesToTicks(maxVelocity));
-
-        telemetry.addData("Max Velocity", maxVelocity);
-        telemetry.addData("Voltage Compensated kF", effectiveKf * batteryVoltageSensor.getVoltage() / 12);
-        telemetry.update();
-
-        while (!isStopRequested() && opModeIsActive()) idle();
-    }
-
     private MecanumDriveSubsystem drive;
 
     @Override
@@ -98,11 +58,27 @@ public class MaxVelocityTuner extends CommandOpMode {
 
             drive.setDrivePower(new Pose2d(1, 0, 0));
             timer = new ElapsedTime();
-        }));
+        }, drive));
 
-        ParallelDeadlineGroup runCommand = new ParallelDeadlineGroup(
-                new WaitUntilCommand(() -> timer.seconds() < RUNTIME)
-        );
+        RunCommand runCommand = new RunCommand(() -> {
+            // update is called every loop in the periodic method of the drive subsystem
+
+            Pose2d poseVelo = Objects.requireNonNull(drive.getPoseVelocity(), "poseVelocity() must not be null. Ensure that the getWheelVelocities() method has been overridden in your localizer.");
+
+            maxVelocity = Math.max(poseVelo.vec().norm(), maxVelocity);
+        }, drive);
+
+        schedule(runCommand.deadlineWith(new WaitUntilCommand(() -> timer.seconds() < RUNTIME)).andThen(
+                new InstantCommand(() -> {
+                    drive.setDrivePower(new Pose2d());
+
+                    double effectiveKf = DriveConstants.getMotorVelocityF(veloInchesToTicks(maxVelocity));
+
+                    telemetry.addData("Max Velocity", maxVelocity);
+                    telemetry.addData("Voltage Compensated kF", effectiveKf * batteryVoltageSensor.getVoltage() / 12);
+                    telemetry.update();
+                })
+        ));
     }
 
     private double veloInchesToTicks(double inchesPerSec) {

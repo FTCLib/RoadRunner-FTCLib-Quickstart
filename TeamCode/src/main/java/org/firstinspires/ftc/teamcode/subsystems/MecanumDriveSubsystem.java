@@ -107,4 +107,8 @@ public class MecanumDriveSubsystem extends SubsystemBase {
         drive(0, 0, 0);
     }
 
+    public Pose2d getPoseVelocity() {
+        return drive.getPoseVelocity();
+    }
+
 }
