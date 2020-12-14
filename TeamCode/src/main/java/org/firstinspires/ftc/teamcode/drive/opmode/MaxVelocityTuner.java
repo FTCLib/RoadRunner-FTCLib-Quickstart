@@ -2,6 +2,10 @@ package org.firstinspires.ftc.teamcode.drive.opmode;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.arcrobotics.ftclib.command.CommandOpMode;
+import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.ParallelDeadlineGroup;
+import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -10,6 +14,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.drive.SampleMecanumDrive;
+import org.firstinspires.ftc.teamcode.subsystems.MecanumDriveSubsystem;
 
 import java.util.Objects;
 
@@ -20,10 +25,12 @@ import java.util.Objects;
  * Upon pressing start, your bot will run at max power for RUNTIME seconds.
  * <p>
  * Further fine tuning of kF may be desired.
+ *
+ * NOTE: this has been refactored to use FTCLib's command-based
  */
 @Config
 @Autonomous(group = "drive")
-public class MaxVelocityTuner extends LinearOpMode {
+public class MaxVelocityTuner extends CommandOpMode {
     public static double RUNTIME = 2.0;
 
     private ElapsedTime timer;
@@ -72,7 +79,34 @@ public class MaxVelocityTuner extends LinearOpMode {
         while (!isStopRequested() && opModeIsActive()) idle();
     }
 
+    private MecanumDriveSubsystem drive;
+
+    @Override
+    public void initialize() {
+        drive = new MecanumDriveSubsystem(new SampleMecanumDrive(hardwareMap), false);
+        batteryVoltageSensor = hardwareMap.voltageSensor.iterator().next();
+
+        telemetry.addLine("Your bot will go at full speed for " + RUNTIME + " seconds.");
+        telemetry.addLine("Please ensure you have enough space cleared.");
+        telemetry.addLine("");
+        telemetry.addLine("Press start when ready.");
+        telemetry.update();
+
+        schedule(new InstantCommand(() -> {
+            telemetry.clearAll();
+            telemetry.update();
+
+            drive.setDrivePower(new Pose2d(1, 0, 0));
+            timer = new ElapsedTime();
+        }));
+
+        ParallelDeadlineGroup runCommand = new ParallelDeadlineGroup(
+                new WaitUntilCommand()
+        );
+    }
+
     private double veloInchesToTicks(double inchesPerSec) {
         return inchesPerSec / (2 * Math.PI * DriveConstants.WHEEL_RADIUS) / DriveConstants.GEAR_RATIO * DriveConstants.TICKS_PER_REV;
     }
+
 }

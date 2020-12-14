@@ -117,59 +117,54 @@ public class DriveVelocityPIDTuner extends CommandOpMode {
             profileStart = clock.seconds();
         }), new PerpetualCommand(new RunCommand(() -> telemetry.addData("mode", mode))));
 
-        InstantCommand tuningModeCommand = new InstantCommand(() -> {
-            if (gamepad1.x) {
-                mode = Mode.DRIVER_MODE;
-                drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-            }
-
-            // calculate and set the motor power
-            double profileTime = clock.seconds() - profileStart;
-
-            if (profileTime > activeProfile.duration()) {
-                // generate a new profile
-                movingForwards = !movingForwards;
-                activeProfile = generateProfile(movingForwards);
-                profileStart = clock.seconds();
-            }
-
-            MotionState motionState = activeProfile.get(profileTime);
-            double targetPower = kV * motionState.getV();
-            drive.setDrivePower(new Pose2d(targetPower, 0, 0));
-
-            List<Double> velocities = drive.getWheelVelocities();
-
-            // update telemetry
-            telemetry.addData("targetVelocity", motionState.getV());
-            for (int i = 0; i < velocities.size(); i++) {
-                telemetry.addData("measuredVelocity" + i, velocities.get(i));
-                telemetry.addData(
-                        "error" + i,
-                        motionState.getV() - velocities.get(i)
-                );
-            }
-        });
-
-        InstantCommand driverModeCmmand = new InstantCommand(() -> {
-            if (gamepad1.a) {
-                drive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-                mode = Mode.TUNING_MODE;
-                movingForwards = true;
-                activeProfile = generateProfile(movingForwards);
-                profileStart = clock.seconds();
-            }
-
-            drive.drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
-        });
-
-        SelectCommand runCommand = new SelectCommand(new HashMap<Object, Command>() {{
-            put(Mode.TUNING_MODE, tuningModeCommand);
-            put(Mode.DRIVER_MODE, driverModeCmmand);
-        }}, () -> mode);
-
         schedule(new PerpetualCommand(new RunCommand(() -> {
-            runCommand.schedule();
+            switch (mode) {
+                case TUNING_MODE:
+                    if (gamepad1.x) {
+                        mode = Mode.DRIVER_MODE;
+                        drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                    }
+
+                    // calculate and set the motor power
+                    double profileTime = clock.seconds() - profileStart;
+
+                    if (profileTime > activeProfile.duration()) {
+                        // generate a new profile
+                        movingForwards = !movingForwards;
+                        activeProfile = generateProfile(movingForwards);
+                        profileStart = clock.seconds();
+                    }
+
+                    MotionState motionState = activeProfile.get(profileTime);
+                    double targetPower = kV * motionState.getV();
+                    drive.setDrivePower(new Pose2d(targetPower, 0, 0));
+
+                    List<Double> velocities = drive.getWheelVelocities();
+
+                    // update telemetry
+                    telemetry.addData("targetVelocity", motionState.getV());
+                    for (int i = 0; i < velocities.size(); i++) {
+                        telemetry.addData("measuredVelocity" + i, velocities.get(i));
+                        telemetry.addData(
+                                "error" + i,
+                                motionState.getV() - velocities.get(i)
+                        );
+                    }
+                    break;
+                case DRIVER_MODE:
+                    if (gamepad1.a) {
+                        drive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+                        mode = Mode.TUNING_MODE;
+                        movingForwards = true;
+                        activeProfile = generateProfile(movingForwards);
+                        profileStart = clock.seconds();
+                    }
+
+                    drive.drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
+                    break;
+            }
+
             if (lastKp != MOTOR_VELO_PID.p || lastKd != MOTOR_VELO_PID.d
                     || lastKi != MOTOR_VELO_PID.i || lastKf != MOTOR_VELO_PID.f) {
                 drive.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, MOTOR_VELO_PID);
@@ -179,6 +174,7 @@ public class DriveVelocityPIDTuner extends CommandOpMode {
                 lastKd = MOTOR_VELO_PID.d;
                 lastKf = MOTOR_VELO_PID.f;
             }
+
             telemetry.update();
         })));
     }
