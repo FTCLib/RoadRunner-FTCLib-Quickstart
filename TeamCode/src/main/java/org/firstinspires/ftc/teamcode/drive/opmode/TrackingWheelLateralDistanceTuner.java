@@ -101,6 +101,8 @@ public class TrackingWheelLateralDistanceTuner extends CommandOpMode {
         telemetry.addLine("Press Y/△ to stop the routine.");
         telemetry.update();
 
+        gamepad = new GamepadEx(gamepad1);
+
         schedule(new InstantCommand(() -> {
             telemetry.clearAll();
             telemetry.update();
