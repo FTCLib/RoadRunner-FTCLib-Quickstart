@@ -72,7 +72,7 @@ public class MaxVelocityTuner extends CommandOpMode {
             maxVelocity = Math.max(poseVelo.vec().norm(), maxVelocity);
         }, drive);
 
-        schedule(runCommand.deadlineWith(new WaitUntilCommand(() -> timer.seconds() < RUNTIME))
+        schedule(runCommand.deadlineWith(new WaitUntilCommand(() -> timer.seconds() >= RUNTIME))
                 .andThen(new InstantCommand(() -> {
                     drive.setDrivePower(new Pose2d());
 

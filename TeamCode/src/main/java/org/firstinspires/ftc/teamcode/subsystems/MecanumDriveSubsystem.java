@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.subsystems;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.acmerobotics.roadrunner.localization.Localizer;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
 import com.arcrobotics.ftclib.command.SubsystemBase;
@@ -109,6 +110,10 @@ public class MecanumDriveSubsystem extends SubsystemBase {
 
     public Pose2d getPoseVelocity() {
         return drive.getPoseVelocity();
+    }
+
+    public Localizer getLocalizer() {
+        return drive.getLocalizer();
     }
 
 }
