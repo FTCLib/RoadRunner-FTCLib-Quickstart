@@ -18,15 +18,13 @@ public class MecanumDriveCommand extends CommandBase {
         this.leftX = leftX;
         this.leftY = leftY;
         this.rightX = rightX;
+
+        addRequirements(drive);
     }
 
     @Override
     public void execute() {
-        drive.drive(new Pose2d(
-                -leftY.getAsDouble(),
-                -leftX.getAsDouble(),
-                -rightX.getAsDouble()
-        ));
+        drive.drive(leftY.getAsDouble(), leftX.getAsDouble(), rightX.getAsDouble());
     }
 
 }
