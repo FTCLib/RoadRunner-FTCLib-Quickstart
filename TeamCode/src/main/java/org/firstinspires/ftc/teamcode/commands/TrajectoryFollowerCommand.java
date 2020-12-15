@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.commands;
 
-import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.arcrobotics.ftclib.command.CommandBase;
 
