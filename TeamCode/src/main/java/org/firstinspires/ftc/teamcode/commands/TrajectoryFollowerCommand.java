@@ -10,6 +10,8 @@ public class TrajectoryFollowerCommand extends CommandBase {
     private final MecanumDriveSubsystem drive;
     private final Trajectory trajectory;
 
+    private boolean runOnce;
+
     public TrajectoryFollowerCommand(MecanumDriveSubsystem drive, Trajectory trajectory) {
         this.drive = drive;
         this.trajectory = trajectory;
@@ -19,12 +21,15 @@ public class TrajectoryFollowerCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        drive.followTrajectory(trajectory);
+        runOnce = false;
     }
 
     @Override
     public void execute() {
-        drive.periodic();   // forcefully call the periodic method
+        if (!runOnce) {
+            drive.followTrajectory(trajectory);
+            runOnce = true;
+        }
     }
 
     @Override
