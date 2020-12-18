@@ -24,6 +24,11 @@ public class TrajectoryFollowerCommand extends CommandBase {
     }
 
     @Override
+    public void execute() {
+        drive.periodic();   // forcefully call the periodic method
+    }
+
+    @Override
     public void end(boolean interrupted) {
         if (interrupted) {
             drive.stop();
