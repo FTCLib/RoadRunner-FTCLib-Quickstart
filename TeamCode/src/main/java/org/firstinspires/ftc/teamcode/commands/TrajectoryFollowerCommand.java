@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.commands;
 
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.arcrobotics.ftclib.command.CommandBase;
 
@@ -10,8 +11,6 @@ public class TrajectoryFollowerCommand extends CommandBase {
     private final MecanumDriveSubsystem drive;
     private final Trajectory trajectory;
 
-    private boolean runOnce;
-
     public TrajectoryFollowerCommand(MecanumDriveSubsystem drive, Trajectory trajectory) {
         this.drive = drive;
         this.trajectory = trajectory;
@@ -21,15 +20,7 @@ public class TrajectoryFollowerCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        runOnce = false;
-    }
-
-    @Override
-    public void execute() {
-        if (!runOnce) {
-            drive.followTrajectory(trajectory);
-            runOnce = true;
-        }
+        drive.followTrajectory(trajectory);
     }
 
     @Override
