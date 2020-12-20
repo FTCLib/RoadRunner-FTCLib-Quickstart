@@ -9,6 +9,8 @@ public class TurnCommand extends CommandBase {
     private final MecanumDriveSubsystem drive;
     private final double angle;
 
+    private boolean runOnce;
+
     public TurnCommand(MecanumDriveSubsystem drive, double angle) {
         this.drive = drive;
         this.angle = angle;
@@ -18,7 +20,15 @@ public class TurnCommand extends CommandBase {
 
     @Override
     public void initialize() {
-        drive.turn(angle);
+        runOnce = false;
+    }
+
+    @Override
+    public void execute() {
+        if (!runOnce) {
+            drive.turn(angle);
+            runOnce = true;
+        }
     }
 
     @Override
