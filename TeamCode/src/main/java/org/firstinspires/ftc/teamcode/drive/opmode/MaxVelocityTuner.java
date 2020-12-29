@@ -59,7 +59,7 @@ public class MaxVelocityTuner extends CommandOpMode {
         }, drive));
 
         RunCommand runCommand = new RunCommand(() -> {
-            // update is called every loop in the periodic method of the drive subsystem
+            drive.update();
 
             Pose2d poseVelo = Objects.requireNonNull(
                     drive.getPoseVelocity(),
