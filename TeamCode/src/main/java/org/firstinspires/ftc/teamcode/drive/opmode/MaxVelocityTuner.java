@@ -32,7 +32,7 @@ public class MaxVelocityTuner extends CommandOpMode {
 
     public static double RUNTIME = 2.0;
 
-    private ElapsedTime timer;
+    private ElapsedTime timer = new ElapsedTime();
     private double maxVelocity = 0.0;
 
     private VoltageSensor batteryVoltageSensor;
@@ -50,17 +50,17 @@ public class MaxVelocityTuner extends CommandOpMode {
         telemetry.addLine("Press start when ready.");
         telemetry.update();
 
-        schedule(new InstantCommand(() -> {
-            telemetry.clearAll();
-            telemetry.update();
+        schedule(new WaitUntilCommand(this::isStarted)
+                .andThen(new InstantCommand(() -> {
+                    telemetry.clearAll();
+                    telemetry.update();
 
-            drive.setDrivePower(new Pose2d(1, 0, 0));
-            timer = new ElapsedTime();
-        }, drive));
+                    drive.setDrivePower(new Pose2d(1, 0, 0));
+                    timer.reset();
+                }))
+        );
 
         RunCommand runCommand = new RunCommand(() -> {
-            drive.update();
-
             Pose2d poseVelo = Objects.requireNonNull(
                     drive.getPoseVelocity(),
                     "poseVelocity() must not be null. " +

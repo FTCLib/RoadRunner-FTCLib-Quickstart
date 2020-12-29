@@ -7,6 +7,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.util.Angle;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.MovingStatistics;
@@ -55,14 +56,17 @@ public class TrackWidthTuner extends CommandOpMode {
         telemetry.addLine("Make sure your robot has enough clearance to turn smoothly");
         telemetry.update();
 
-        InstantCommand setupCommand = new InstantCommand(() -> {
-            telemetry.clearAll();
-            telemetry.addLine("Running...");
-            telemetry.update();
+        SequentialCommandGroup setupCommand = new SequentialCommandGroup(
+                new WaitUntilCommand(this::isStarted),
+                new InstantCommand(() -> {
+                    telemetry.clearAll();
+                    telemetry.addLine("Running...");
+                    telemetry.update();
 
-            trackWidthStats = new MovingStatistics(NUM_TRIALS);
-            trial = 0;
-        });
+                    trackWidthStats = new MovingStatistics(NUM_TRIALS);
+                    trial = 0;
+                }
+        ));
 
         InstantCommand finishCommand = new InstantCommand(() -> {
             telemetry.clearAll();

@@ -33,15 +33,13 @@ public class LocalizationTest extends CommandOpMode {
     public void initialize() {
         drive = new MecanumDriveSubsystem(new SampleMecanumDrive(hardwareMap), false);
 
-        schedule(new PerpetualCommand(new RunCommand(
-                () -> {
-                    Pose2d poseEstimate = drive.getPoseEstimate();
-                    telemetry.addData("x", poseEstimate.getX());
-                    telemetry.addData("y", poseEstimate.getY());
-                    telemetry.addData("heading", poseEstimate.getHeading());
-                    telemetry.update();
-                }   // ignore requirements
-        )));
+        schedule(new RunCommand(() -> {
+                Pose2d poseEstimate = drive.getPoseEstimate();
+                telemetry.addData("x", poseEstimate.getX());
+                telemetry.addData("y", poseEstimate.getY());
+                telemetry.addData("heading", poseEstimate.getHeading());
+                telemetry.update();
+        }));
 
         driveCommand = new MecanumDriveCommand(
                 drive, () -> -gamepad.getLeftY(),
