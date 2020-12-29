@@ -104,8 +104,8 @@ public class TrackWidthTuner extends CommandOpMode {
         }, drive);
 
         schedule(setupCommand.andThen(
-                tuneCommand
-                    .deadlineWith(new WaitUntilCommand(() -> trial == NUM_TRIALS))
+                new WaitUntilCommand(() -> trial == NUM_TRIALS)
+                    .deadlineWith(tuneCommand)
                     .whenFinished(turnCommand::cancel),
                 finishCommand
         ));
