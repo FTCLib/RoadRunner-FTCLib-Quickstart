@@ -10,6 +10,8 @@ import com.acmerobotics.roadrunner.profile.MotionState;
 import com.acmerobotics.roadrunner.util.NanoClock;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
+import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.arcrobotics.ftclib.command.button.Button;
 import com.arcrobotics.ftclib.command.button.GamepadButton;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
@@ -106,17 +108,20 @@ public class DriveVelocityPIDTuner extends CommandOpMode {
 
         drive.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, MOTOR_VELO_PID);
 
-       clock = NanoClock.system();
+        clock = NanoClock.system();
 
         telemetry.addLine("Ready!");
         telemetry.update();
         telemetry.clearAll();
 
-        schedule(new InstantCommand(() -> {
-            movingForwards = true;
-            activeProfile = generateProfile(true);
-            profileStart = clock.seconds();
-        }), new RunCommand(() -> telemetry.addData("mode", mode)));
+        schedule(new SequentialCommandGroup(
+            new WaitUntilCommand(this::isStarted),
+            new InstantCommand(() -> {
+                movingForwards = true;
+                activeProfile = generateProfile(true);
+                profileStart = clock.seconds();
+            })
+        ), new RunCommand(() -> telemetry.addData("mode", mode)));
 
         xButton = new GamepadButton(gamepad, GamepadKeys.Button.X)
                 .whenPressed(() -> {
@@ -165,7 +170,7 @@ public class DriveVelocityPIDTuner extends CommandOpMode {
                     drive.drive(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
                     break;
             }
-        }, drive).alongWith(new RunCommand(() -> {
+
             if (lastKp != MOTOR_VELO_PID.p || lastKd != MOTOR_VELO_PID.d
                     || lastKi != MOTOR_VELO_PID.i || lastKf != MOTOR_VELO_PID.f) {
                 drive.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, MOTOR_VELO_PID);
@@ -175,8 +180,9 @@ public class DriveVelocityPIDTuner extends CommandOpMode {
                 lastKd = MOTOR_VELO_PID.d;
                 lastKf = MOTOR_VELO_PID.f;
             }
+
             telemetry.update();
-        })));
+        }));
     }
 
 }
