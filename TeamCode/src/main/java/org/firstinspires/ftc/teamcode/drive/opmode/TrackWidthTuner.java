@@ -81,10 +81,14 @@ public class TrackWidthTuner extends CommandOpMode {
 
         RunCommand tuneCommand = new RunCommand(() -> {
             if (trial < NUM_TRIALS && (turnCommand == null || !turnCommand.isScheduled())) {
-                double trackWidth = DriveConstants.TRACK_WIDTH * Math.toRadians(ANGLE) / headingAccumulator;
-                trackWidthStats.add(trackWidth);
+                if (headingAccumulator != 0) {
+                    double trackWidth = DriveConstants.TRACK_WIDTH * Math.toRadians(ANGLE) / headingAccumulator;
+                    trackWidthStats.add(trackWidth);
+                }
 
                 sleep(DELAY);
+
+                trial++;
 
                 drive.setPoseEstimate(new Pose2d());
 
@@ -94,8 +98,6 @@ public class TrackWidthTuner extends CommandOpMode {
 
                 turnCommand = new TurnCommand(drive, Math.toRadians(ANGLE));
                 turnCommand.schedule();
-
-                trial++;
             } else {
                 double heading = drive.getPoseEstimate().getHeading();
                 headingAccumulator += Angle.norm(heading - lastHeading);
