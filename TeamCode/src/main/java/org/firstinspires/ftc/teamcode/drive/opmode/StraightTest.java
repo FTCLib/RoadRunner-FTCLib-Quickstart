@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.drive.opmode;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.CommandOpMode;
+import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.commands.TrajectoryFollowerCommand;
@@ -31,13 +32,13 @@ public class StraightTest extends CommandOpMode {
                     .forward(DISTANCE)
                     .build()
         );
-        schedule(straightFollower.whenFinished(() -> {
+        schedule(new WaitUntilCommand(this::isStarted).andThen(straightFollower.whenFinished(() -> {
             Pose2d poseEstimate = drive.getPoseEstimate();
             telemetry.addData("finalX", poseEstimate.getX());
             telemetry.addData("finalY", poseEstimate.getY());
             telemetry.addData("finalHeading", poseEstimate.getHeading());
             telemetry.update();
-        }));
+        })));
     }
 
 }

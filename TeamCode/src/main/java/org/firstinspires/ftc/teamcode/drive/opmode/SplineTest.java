@@ -5,6 +5,7 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.WaitCommand;
+import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import org.firstinspires.ftc.teamcode.commands.TrajectoryFollowerCommand;
@@ -29,13 +30,14 @@ public class SplineTest extends CommandOpMode {
                 .splineTo(new Vector2d(30, 30), 0)
                 .build();
         splineFollower = new TrajectoryFollowerCommand(drive, traj);
-        schedule(splineFollower.andThen(new WaitCommand(2000),
-            new TrajectoryFollowerCommand(drive,
-                drive.trajectoryBuilder(traj.end(), true)
-                    .splineTo(new Vector2d(0, 0), Math.toRadians(180))
-                    .build()
-            ))
-        );
+        schedule(new WaitUntilCommand(this::isStarted).andThen(
+                splineFollower.andThen(new WaitCommand(2000),
+                new TrajectoryFollowerCommand(drive,
+                    drive.trajectoryBuilder(traj.end(), true)
+                        .splineTo(new Vector2d(0, 0), Math.toRadians(180))
+                        .build()
+                ))
+        ));
     }
 
 }
