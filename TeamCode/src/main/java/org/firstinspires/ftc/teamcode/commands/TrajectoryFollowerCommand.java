@@ -23,6 +23,11 @@ public class TrajectoryFollowerCommand extends CommandBase {
     }
 
     @Override
+    public void execute() {
+        drive.update();
+    }
+
+    @Override
     public void end(boolean interrupted) {
         if (interrupted) {
             drive.stop();
