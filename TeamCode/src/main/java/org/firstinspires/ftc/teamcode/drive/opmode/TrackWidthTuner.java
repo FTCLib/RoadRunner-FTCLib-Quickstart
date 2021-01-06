@@ -52,7 +52,7 @@ public class TrackWidthTuner extends CommandOpMode {
         // TODO: if you haven't already, set the localizer to something that doesn't depend on
         // drive encoders for computing the heading
 
-        turnCommand = new TurnCommand(drive, ANGLE);
+        turnCommand = new TurnCommand(drive, Math.toRadians(ANGLE));
 
         telemetry.addLine("Press play to begin the track width tuner routine");
         telemetry.addLine("Make sure your robot has enough clearance to turn smoothly");
@@ -80,7 +80,7 @@ public class TrackWidthTuner extends CommandOpMode {
         });
 
         RunCommand tuneCommand = new RunCommand(() -> {
-            if (turnCommand == null || !turnCommand.isScheduled()) {
+            if (trial < NUM_TRIALS && (turnCommand == null || !turnCommand.isScheduled())) {
                 double trackWidth = DriveConstants.TRACK_WIDTH * Math.toRadians(ANGLE) / headingAccumulator;
                 trackWidthStats.add(trackWidth);
 
@@ -92,7 +92,7 @@ public class TrackWidthTuner extends CommandOpMode {
                 headingAccumulator = 0;
                 lastHeading = 0;
 
-                turnCommand = new TurnCommand(drive, ANGLE);
+                turnCommand = new TurnCommand(drive, Math.toRadians(ANGLE));
                 turnCommand.schedule();
 
                 trial++;
