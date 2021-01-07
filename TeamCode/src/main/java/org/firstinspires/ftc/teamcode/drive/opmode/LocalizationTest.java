@@ -36,6 +36,7 @@ public class LocalizationTest extends CommandOpMode {
         gamepad = new GamepadEx(gamepad1);
 
         schedule(new RunCommand(() -> {
+                drive.update();
                 Pose2d poseEstimate = drive.getPoseEstimate();
                 telemetry.addData("x", poseEstimate.getX());
                 telemetry.addData("y", poseEstimate.getY());
