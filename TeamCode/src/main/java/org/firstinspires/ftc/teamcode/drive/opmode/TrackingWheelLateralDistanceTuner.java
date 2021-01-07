@@ -115,24 +115,24 @@ public class TrackingWheelLateralDistanceTuner extends CommandOpMode {
         yButton = new GamepadButton(gamepad, GamepadKeys.Button.Y)
             .whenPressed(() -> turningFinished = true);
 
-        schedule(new RunCommand(() -> {
-            Pose2d vel = new Pose2d(0, 0, -gamepad1.right_stick_x);
-            drive.setDrivePower(vel);
+        schedule(new WaitUntilCommand(() -> turningFinished)
+            .deadlineWith(new RunCommand(() -> {
+                Pose2d vel = new Pose2d(0, 0, -gamepad1.right_stick_x);
+                drive.setDrivePower(vel);
 
-            double heading = drive.getPoseEstimate().getHeading();
-            double deltaHeading = heading - lastHeading;
+                double heading = drive.getPoseEstimate().getHeading();
+                double deltaHeading = heading - lastHeading;
 
-            headingAccumulator += Angle.normDelta(deltaHeading);
-            lastHeading = heading;
+                headingAccumulator += Angle.normDelta(deltaHeading);
+                lastHeading = heading;
 
-            telemetry.clearAll();
-            telemetry.addLine("Total Heading (deg): " + Math.toDegrees(headingAccumulator));
-            telemetry.addLine("Raw Heading (deg): " + Math.toDegrees(heading));
-            telemetry.addLine();
-            telemetry.addLine("Press Y/△ to conclude routine");
-            telemetry.update();
-        }, drive)
-            .deadlineWith(new WaitUntilCommand(() -> turningFinished))
+                telemetry.clearAll();
+                telemetry.addLine("Total Heading (deg): " + Math.toDegrees(headingAccumulator));
+                telemetry.addLine("Raw Heading (deg): " + Math.toDegrees(heading));
+                telemetry.addLine();
+                telemetry.addLine("Press Y/△ to conclude routine");
+                telemetry.update();
+            }, drive)
             .whenFinished(() -> {
                 telemetry.clearAll();
                 telemetry.addLine("Localizer's total heading: " + Math.toDegrees(headingAccumulator) + "°");
@@ -140,7 +140,7 @@ public class TrackingWheelLateralDistanceTuner extends CommandOpMode {
                         (headingAccumulator / (NUM_TURNS * Math.PI * 2)) * StandardTrackingWheelLocalizer.LATERAL_DISTANCE);
 
                 telemetry.update();
-            })
+            }))
         );
     }
 

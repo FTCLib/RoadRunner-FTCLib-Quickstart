@@ -16,7 +16,6 @@ import com.arcrobotics.ftclib.command.button.GamepadButton;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.teamcode.commands.RunCommand;
@@ -30,6 +29,8 @@ import static org.firstinspires.ftc.teamcode.drive.DriveConstants.RUN_USING_ENCO
 import static org.firstinspires.ftc.teamcode.drive.DriveConstants.kA;
 import static org.firstinspires.ftc.teamcode.drive.DriveConstants.kStatic;
 import static org.firstinspires.ftc.teamcode.drive.DriveConstants.kV;
+import static org.firstinspires.ftc.teamcode.drive.DriveConstants.MAX_VEL;
+import static org.firstinspires.ftc.teamcode.drive.DriveConstants.MAX_ACCEL;
 
 /**
  * This routine is designed to tune the open-loop feedforward coefficients. Although it may seem unnecessary,
@@ -75,10 +76,7 @@ public class ManualFeedforwardTuner extends CommandOpMode {
     private static MotionProfile generateProfile(boolean movingForward) {
         MotionState start = new MotionState(movingForward ? 0 : DISTANCE, 0, 0, 0);
         MotionState goal = new MotionState(movingForward ? DISTANCE : 0, 0, 0, 0);
-        return MotionProfileGenerator.generateSimpleMotionProfile(start, goal,
-                DriveConstants.BASE_CONSTRAINTS.maxVel,
-                DriveConstants.BASE_CONSTRAINTS.maxAccel,
-                DriveConstants.BASE_CONSTRAINTS.maxJerk);
+        return MotionProfileGenerator.generateSimpleMotionProfile(start, goal, MAX_VEL, MAX_ACCEL);
     }
 
     private NanoClock clock;

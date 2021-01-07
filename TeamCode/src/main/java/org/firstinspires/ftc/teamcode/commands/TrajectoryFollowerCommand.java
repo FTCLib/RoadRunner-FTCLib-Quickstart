@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.commands;
 
-import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.arcrobotics.ftclib.command.CommandBase;
 
@@ -21,6 +20,11 @@ public class TrajectoryFollowerCommand extends CommandBase {
     @Override
     public void initialize() {
         drive.followTrajectory(trajectory);
+    }
+
+    @Override
+    public void execute() {
+        drive.update();
     }
 
     @Override

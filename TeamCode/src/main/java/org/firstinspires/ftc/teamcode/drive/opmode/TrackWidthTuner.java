@@ -7,6 +7,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.util.Angle;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.InstantCommand;
+import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitUntilCommand;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.util.MovingStatistics;
@@ -51,18 +52,23 @@ public class TrackWidthTuner extends CommandOpMode {
         // TODO: if you haven't already, set the localizer to something that doesn't depend on
         // drive encoders for computing the heading
 
+        turnCommand = new TurnCommand(drive, Math.toRadians(ANGLE));
+
         telemetry.addLine("Press play to begin the track width tuner routine");
         telemetry.addLine("Make sure your robot has enough clearance to turn smoothly");
         telemetry.update();
 
-        InstantCommand setupCommand = new InstantCommand(() -> {
-            telemetry.clearAll();
-            telemetry.addLine("Running...");
-            telemetry.update();
+        SequentialCommandGroup setupCommand = new SequentialCommandGroup(
+                new WaitUntilCommand(this::isStarted),
+                new InstantCommand(() -> {
+                    telemetry.clearAll();
+                    telemetry.addLine("Running...");
+                    telemetry.update();
 
-            trackWidthStats = new MovingStatistics(NUM_TRIALS);
-            trial = 0;
-        });
+                    trackWidthStats = new MovingStatistics(NUM_TRIALS);
+                    trial = 0;
+                }
+        ));
 
         InstantCommand finishCommand = new InstantCommand(() -> {
             telemetry.clearAll();
@@ -74,13 +80,15 @@ public class TrackWidthTuner extends CommandOpMode {
         });
 
         RunCommand tuneCommand = new RunCommand(() -> {
-            if (turnCommand == null || !turnCommand.isScheduled()) {
-                if (turnCommand != null) {
+            if (trial < NUM_TRIALS && (turnCommand == null || !turnCommand.isScheduled())) {
+                if (headingAccumulator != 0) {
                     double trackWidth = DriveConstants.TRACK_WIDTH * Math.toRadians(ANGLE) / headingAccumulator;
                     trackWidthStats.add(trackWidth);
                 }
 
                 sleep(DELAY);
+
+                trial++;
 
                 drive.setPoseEstimate(new Pose2d());
 
@@ -88,20 +96,18 @@ public class TrackWidthTuner extends CommandOpMode {
                 headingAccumulator = 0;
                 lastHeading = 0;
 
-                turnCommand = new TurnCommand(drive, ANGLE);
+                turnCommand = new TurnCommand(drive, Math.toRadians(ANGLE));
                 turnCommand.schedule();
-
-                trial++;
             } else {
                 double heading = drive.getPoseEstimate().getHeading();
                 headingAccumulator += Angle.norm(heading - lastHeading);
                 lastHeading = heading;
             }
-        }, drive);
+        });
 
         schedule(setupCommand.andThen(
-                tuneCommand
-                    .deadlineWith(new WaitUntilCommand(() -> trial == NUM_TRIALS))
+                new WaitUntilCommand(() -> trial == NUM_TRIALS)
+                    .deadlineWith(tuneCommand)
                     .whenFinished(turnCommand::cancel),
                 finishCommand
         ));

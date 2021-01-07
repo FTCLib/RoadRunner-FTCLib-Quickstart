@@ -1,6 +1,4 @@
-# Road Runner FTCLib Quickstart
-
-**CURRENTLY IN PRODUCTION**
+# Road Runner FTCLib Quickstart (CURRENTLY IN PRODUCTION)
 
 An example FTC project using [Road Runner](https://github.com/acmerobotics/road-runner) with a dependency for [FTCLib](https://www.github.com/FTCLib/FTCLib) to set up a command-based project.
 

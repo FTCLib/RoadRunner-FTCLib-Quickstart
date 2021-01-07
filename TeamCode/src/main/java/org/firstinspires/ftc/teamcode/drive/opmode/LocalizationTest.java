@@ -3,13 +3,9 @@ package org.firstinspires.ftc.teamcode.drive.opmode;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.CommandOpMode;
-import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.PerpetualCommand;
-import com.arcrobotics.ftclib.command.ScheduleCommand;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.commands.MecanumDriveCommand;
 import org.firstinspires.ftc.teamcode.commands.RunCommand;
@@ -37,15 +33,16 @@ public class LocalizationTest extends CommandOpMode {
     public void initialize() {
         drive = new MecanumDriveSubsystem(new SampleMecanumDrive(hardwareMap), false);
 
-        schedule(new PerpetualCommand(new RunCommand(
-                () -> {
-                    Pose2d poseEstimate = drive.getPoseEstimate();
-                    telemetry.addData("x", poseEstimate.getX());
-                    telemetry.addData("y", poseEstimate.getY());
-                    telemetry.addData("heading", poseEstimate.getHeading());
-                    telemetry.update();
-                }   // ignore requirements
-        )));
+        gamepad = new GamepadEx(gamepad1);
+
+        schedule(new RunCommand(() -> {
+                drive.update();
+                Pose2d poseEstimate = drive.getPoseEstimate();
+                telemetry.addData("x", poseEstimate.getX());
+                telemetry.addData("y", poseEstimate.getY());
+                telemetry.addData("heading", poseEstimate.getHeading());
+                telemetry.update();
+        }));
 
         driveCommand = new MecanumDriveCommand(
                 drive, () -> -gamepad.getLeftY(),
