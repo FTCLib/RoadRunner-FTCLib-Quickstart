@@ -38,6 +38,7 @@ public class FieldCentricTest extends CommandOpMode {
         ));
 
         schedule(new RunCommand(() -> {
+            drive.update();
             telemetry.addData("Heading", drive.getPoseEstimate().getHeading());
             telemetry.update();
         }));
