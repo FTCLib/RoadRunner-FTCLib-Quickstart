@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.drive.opmode;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
+import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -36,6 +37,7 @@ public class FollowerPIDTuner extends CommandOpMode {
 
     private MecanumDriveSubsystem drive;
     private TrajectoryFollowerCommand followerCommand;
+    private Command trajGroup;
     private TurnCommand turnCommand;
     private Pose2d startPose;
 
@@ -47,24 +49,18 @@ public class FollowerPIDTuner extends CommandOpMode {
 
         drive.setPoseEstimate(startPose);
 
-        Trajectory traj = drive.trajectoryBuilder(startPose)
-                .forward(DISTANCE)
-                .build();
-        followerCommand = new TrajectoryFollowerCommand(drive, traj);
-        turnCommand = new TurnCommand(drive, Math.toRadians(90));
-
-        SequentialCommandGroup trajGroup = new SequentialCommandGroup(followerCommand, turnCommand);
-
-        schedule(
-            trajGroup.whenFinished(
-                () -> startPose = traj.end().plus(new Pose2d(0, 0, Math.toRadians(90)))
-            ),
-            new RunCommand(() -> {
-                if (trajGroup.isFinished() || !trajGroup.isScheduled()) {
-                    trajGroup.schedule();
-                }
-            })
-        );
+        schedule(new RunCommand(() -> {
+            if (trajGroup == null || trajGroup.isFinished() || !trajGroup.isScheduled()) {
+                Trajectory traj = drive.trajectoryBuilder(startPose)
+                        .forward(DISTANCE)
+                        .build();
+                followerCommand = new TrajectoryFollowerCommand(drive, traj);
+                turnCommand = new TurnCommand(drive, Math.toRadians(90));
+                trajGroup = new SequentialCommandGroup(followerCommand, turnCommand)
+                        .whenFinished(() -> startPose = traj.end().plus(new Pose2d(0, 0, Math.toRadians(90))));
+                trajGroup.schedule();
+            }
+        }));
     }
 
 }
