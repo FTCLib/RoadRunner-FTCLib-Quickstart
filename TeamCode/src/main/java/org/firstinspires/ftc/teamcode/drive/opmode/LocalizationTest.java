@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.drive.opmode;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.arcrobotics.ftclib.command.CommandOpMode;
 import com.arcrobotics.ftclib.command.PerpetualCommand;
@@ -21,7 +20,6 @@ import org.firstinspires.ftc.teamcode.subsystems.MecanumDriveSubsystem;
  *
  * NOTE: this has been refactored to use FTCLib's command-based
  */
-@Config
 @TeleOp(group = "drive")
 public class LocalizationTest extends CommandOpMode {
 
