@@ -134,6 +134,7 @@ public class ManualFeedforwardTuner extends CommandOpMode {
                             motionState.getV(), motionState.getA(), kV, kA, kStatic);
 
                     drive.setDrivePower(new Pose2d(targetPower, 0, 0));
+                    drive.updatePoseEstimate();
 
                     Pose2d poseVelo = Objects.requireNonNull(drive.getPoseVelocity(),
                             "poseVelocity() must not be null. Ensure that the getWheelVelocities() " +

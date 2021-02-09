@@ -44,6 +44,10 @@ public class MecanumDriveSubsystem extends SubsystemBase {
         drive.update();
     }
 
+    public void updatePoseEstimate() {
+        drive.updatePoseEstimate();
+    }
+
     public void drive(double leftY, double leftX, double rightX) {
         Pose2d poseEstimate = getPoseEstimate();
 
